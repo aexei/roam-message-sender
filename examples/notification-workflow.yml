@@ -1,0 +1,48 @@
+name: Build and Notify
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        id: test
+        run: npm test
+        continue-on-error: true
+      
+      # Notify on test success
+      - name: Notify on test success
+        if: steps.test.outcome == 'success'
+        uses: yourusername/roam-message-sender@v1
+        with:
+          roam-api-key: ${{ secrets.ROAM_API_KEY }}
+          recipients: ${{ secrets.ROAM_RECIPIENTS }}
+          message: "✅ Tests passed for ${{ github.repository }} (${{ github.ref_name }})"
+          sender-name: "GitHub CI"
+      
+      # Notify on test failure
+      - name: Notify on test failure
+        if: steps.test.outcome == 'failure'
+        uses: yourusername/roam-message-sender@v1
+        with:
+          roam-api-key: ${{ secrets.ROAM_API_KEY }}
+          recipients: ${{ secrets.ROAM_RECIPIENTS }}
+          message: "❌ Tests failed for ${{ github.repository }} (${{ github.ref_name }})"
+          sender-name: "GitHub CI"

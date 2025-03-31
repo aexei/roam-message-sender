@@ -1,0 +1,34 @@
+name: 'Roam Message Sender'
+description: 'Sends chat messages to Roam (ro.am) from your GitHub workflow'
+author: 'Your Name'
+branding:
+  icon: 'message-circle'
+  color: 'blue'
+
+inputs:
+  roam-api-key:
+    description: 'Roam API key for authentication'
+    required: true
+  recipients:
+    description: 'Comma-separated list of Roam recipient IDs'
+    required: true
+  message:
+    description: 'The message content to send to Roam'
+    required: true
+  sender-id:
+    description: 'Custom ID for the message sender (optional)'
+    required: false
+  sender-name:
+    description: 'Custom name for the message sender (optional)'
+    required: false
+  sender-image:
+    description: 'Custom image URL for the message sender (optional)'
+    required: false
+
+outputs:
+  message-id:
+    description: 'The ID of the sent message'
+
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

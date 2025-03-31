@@ -1,0 +1,65 @@
+name: Test Roam Message Sender
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      run_integration_test:
+        description: 'Run integration test with real API call'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Lint code
+        run: npm run lint
+        
+      - name: Run unit tests
+        run: npm test
+      
+      - name: Build the action
+        run: npm run build
+      
+      # Optional: Test with mock instead of making real API calls
+      - name: Test action with mock
+        uses: ./
+        env:
+          # Mock the Core module to avoid making actual API calls
+          NODE_ENV: test
+          MOCK_ROAM_API: true
+        with:
+          roam-api-key: 'mock-api-key'
+          recipients: 'mock-user-1,mock-user-2'
+          message: "Test message from GitHub Action: ${{ github.sha }}"
+          sender-name: "Test Bot"
+      
+      # Only run integration test when manually triggered
+      - name: Integration test (real API call)
+        if: github.event_name == 'workflow_dispatch' && inputs.run_integration_test == 'true'
+        uses: ./
+        with:
+          roam-api-key: ${{ secrets.ROAM_API_KEY }}
+          recipients: ${{ secrets.ROAM_TEST_RECIPIENTS }}
+          message: "Integration test from GitHub Action: ${{ github.sha }}"
+          sender-name: "GitHub Action Test"
