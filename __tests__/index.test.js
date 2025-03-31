@@ -1,6 +1,5 @@
 const nock = require('nock');
 const path = require('path');
-const fs = require('fs');
 const { execSync } = require('child_process');
 
 // Mock the GitHub Actions core module
@@ -166,7 +165,7 @@ describe('Roam Message Sender', () => {
         stdio: ['pipe', 'pipe', 'pipe']
       });
       // If we reach here, the test failed because we expected an error
-      fail('Expected the action to throw an error but it succeeded');
+      expect(true).toBe(false, 'Expected the action to throw an error but it succeeded');
     } catch (error) {
       console.error('Error details:');
       if (error.stderr) console.error('stderr:', error.stderr);
