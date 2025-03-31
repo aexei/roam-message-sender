@@ -1,5 +1,6 @@
 const nock = require('nock');
 const path = require('path');
+const fs = require('fs');
 const { execSync } = require('child_process');
 
 // Mock the GitHub Actions core module
@@ -63,12 +64,22 @@ describe('Roam Message Sender', () => {
         status: 'sent'
       });
     
-    // Run the action
+    // Run the action and capture output including possible errors
     const indexPath = path.join(__dirname, '../index.js');
-    const result = execSync(`node ${indexPath}`, { encoding: 'utf8' });
-    
-    // Check that the action logged the success message
-    expect(result).toContain('Message sent successfully to Roam!');
+    let result;
+    try {
+      result = execSync(`node ${indexPath}`, { 
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+      
+      // Check that the action logged the success message
+      expect(result).toContain('Message sent successfully to Roam!');
+    } catch (error) {
+      console.error('Error output:', error.stderr);
+      console.error('Standard output before error:', error.stdout);
+      throw error;
+    }
     
     // Check that outputs were set correctly
     expect(core.setOutput).toHaveBeenCalledWith('message-id', 'msg_123456');
@@ -102,10 +113,19 @@ describe('Roam Message Sender', () => {
     
     // Run the action
     const indexPath = path.join(__dirname, '../index.js');
-    const result = execSync(`node ${indexPath}`, { encoding: 'utf8' });
-    
-    // Check that the action logged the success message
-    expect(result).toContain('Message sent successfully to Roam!');
+    try {
+      const result = execSync(`node ${indexPath}`, { 
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+      
+      // Check that the action logged the success message
+      expect(result).toContain('Message sent successfully to Roam!');
+    } catch (error) {
+      console.error('Error output:', error.stderr);
+      console.error('Standard output before error:', error.stdout);
+      throw error;
+    }
     
     // Reset mock inputs
     mockInputs['sender-name'] = '';
@@ -141,8 +161,17 @@ describe('Roam Message Sender', () => {
     // Run the action and expect it to fail
     const indexPath = path.join(__dirname, '../index.js');
     try {
-      execSync(`node ${indexPath}`, { encoding: 'utf8' });
+      execSync(`node ${indexPath}`, { 
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+      // If we reach here, the test failed because we expected an error
+      fail('Expected the action to throw an error but it succeeded');
     } catch (error) {
+      console.error('Error details:');
+      if (error.stderr) console.error('stderr:', error.stderr);
+      if (error.stdout) console.error('stdout:', error.stdout);
+      
       // Check that setFailed was called with the error message
       expect(core.setFailed).toHaveBeenCalledWith(
         expect.stringContaining('At least one recipient must be provided')
