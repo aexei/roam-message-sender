@@ -30,5 +30,5 @@ outputs:
     description: 'The ID of the sent message'
 
 runs:
-  using: 'node22'
+  using: 'node20'
   main: 'dist/index.js'
