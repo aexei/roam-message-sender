@@ -30,7 +30,7 @@ jobs:
       # Notify on test success
       - name: Notify on test success
         if: steps.test.outcome == 'success'
-        uses: yourusername/roam-message-sender@v1
+        uses: aexei/roam-message-sender@v1
         with:
           roam-api-key: ${{ secrets.ROAM_API_KEY }}
           recipients: ${{ secrets.ROAM_RECIPIENTS }}
@@ -40,7 +40,7 @@ jobs:
       # Notify on test failure
       - name: Notify on test failure
         if: steps.test.outcome == 'failure'
-        uses: yourusername/roam-message-sender@v1
+        uses: aexei/roam-message-sender@v1
         with:
           roam-api-key: ${{ secrets.ROAM_API_KEY }}
           recipients: ${{ secrets.ROAM_RECIPIENTS }}

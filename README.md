@@ -2,7 +2,7 @@
 
 A GitHub Action that sends chat messages to Roam (https://ro.am) directly from your GitHub workflows.
 
-[![GitHub release](https://img.shields.io/github/release/yourusername/roam-message-sender.svg)](https://github.com/yourusername/roam-message-sender/releases)
+[![GitHub release](https://img.shields.io/github/release/aexei/roam-message-sender.svg)](https://github.com/aexei/roam-message-sender/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send message to Roam
-        uses: yourusername/roam-message-sender@v1
+        uses: aexei/roam-message-sender@v1
         with:
           roam-api-key: ${{ secrets.ROAM_API_KEY }}
           recipients: 'user123,group456'
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send deployment notification
-        uses: yourusername/roam-message-sender@v1
+        uses: aexei/roam-message-sender@v1
         with:
           roam-api-key: ${{ secrets.ROAM_API_KEY }}
           recipients: ${{ secrets.ROAM_DEVOPS_GROUP }}
@@ -112,7 +112,7 @@ jobs:
       
       - name: Notify on test failure
         if: steps.tests.outcome == 'failure'
-        uses: yourusername/roam-message-sender@v1
+        uses: aexei/roam-message-sender@v1
         with:
           roam-api-key: ${{ secrets.ROAM_API_KEY }}
           recipients: ${{ secrets.DEVELOPER_GROUP_ID }}
