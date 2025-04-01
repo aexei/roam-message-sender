@@ -1,6 +1,6 @@
 {
     "name": "roam-message-sender",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "GitHub Action to send messages to Roam (ro.am)",
     "main": "dist/index.js",
     "scripts": {
