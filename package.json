@@ -2,9 +2,8 @@
     "name": "roam-message-sender",
     "version": "1.0.2",
     "description": "GitHub Action to send messages to Roam (ro.am)",
-    "main": "dist/index.js",
+    "main": "index.js",
     "scripts": {
-        "build": "ncc build index.js -o dist",
         "test": "jest",
         "lint": "eslint ."
     },
