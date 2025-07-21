@@ -10,48 +10,48 @@ async function run() {
     const senderName = core.getInput('sender-name');
     const senderImage = core.getInput('sender-image');
     const senderId = core.getInput('sender-id');
-    
+
     // Parse recipients (comma-separated list of recipient IDs)
     const recipientList = recipients.split(',').map(id => id.trim());
-    
+
     if (recipientList.length === 0) {
       throw new Error('At least one recipient must be provided');
     }
-    
+
     // Prepare the sender object
     const sender = {};
     if (senderId) sender.id = senderId;
     if (senderName) sender.name = senderName;
     if (senderImage) sender.imageUrl = senderImage;
-    
+
     // Prepare the request payload
     const payload = {
       recipients: recipientList,
       text: message
     };
-    
+
     // Add sender if provided
     if (Object.keys(sender).length > 0) {
       payload.sender = sender;
     }
-    
+
     console.log(`Sending message to ${recipientList.length} recipient(s)`);
-    
+
     // For testing: mock API response if in test mode
     let response;
     if (process.env.MOCK_ROAM_API === 'true') {
       console.log('Running in mock mode - no actual API call will be made');
       console.log('Payload that would be sent:', JSON.stringify(payload, null, 2));
-      
+
       // Create a mock successful response
       response = {
         ok: true,
         status: 200,
-        json: async () => ({ 
+        json: async () => ({
           chatId: 'mock-message-id-123',
           status: 'sent'
         }),
-        text: async () => JSON.stringify({ 
+        text: async () => JSON.stringify({
           chatId: 'mock-message-id-123',
           status: 'sent'
         })
@@ -69,37 +69,29 @@ async function run() {
         body: JSON.stringify(payload)
       });
     }
-    
+
     // Handle the response
-    const responseText = await response.text();
-    let responseData;
-    
-    try {
-      if (responseText) {
-        responseData = JSON.parse(responseText);
-      }
-    } catch (error) {
-      console.log('Failed to parse response as JSON:', responseText);
-    }
-    
+    const responseData = await response.json();
+    core.debug(`Response from Roam API: ${JSON.stringify(responseData, null, 2)}`);
+
     if (!response.ok) {
-      const errorMessage = responseData?.error || responseText || response.statusText;
+      const errorMessage = responseData?.error || response.statusText;
       throw new Error(`Roam API error (${response.status}): ${errorMessage}`);
     }
-    
+
     // Log success message
     console.log('Message sent successfully to Roam!');
     if (responseData?.chatId) {
       console.log(`Message ID: ${responseData.chatId}`);
       core.setOutput('message-id', responseData.chatId);
     }
-    
+
     // Set job summary
     core.summary.addHeading('Roam Message Sent Successfully');
     core.summary.addRaw(`Message was sent to ${recipientList.length} recipient(s)`);
     core.summary.addCodeBlock(message, 'text');
     core.summary.write();
-    
+
   } catch (error) {
     core.setFailed(`Action failed with error: ${error.message}`);
   }
