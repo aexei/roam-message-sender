@@ -89,9 +89,9 @@ async function run() {
     
     // Log success message
     console.log('Message sent successfully to Roam!');
-    if (responseData?.id) {
-      console.log(`Message ID: ${responseData.id}`);
-      core.setOutput('message-id', responseData.id);
+    if (responseData?.chatId) {
+      console.log(`Message ID: ${responseData.chatId}`);
+      core.setOutput('message-id', responseData.chatId);
     }
     
     // Set job summary
