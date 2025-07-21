@@ -83,7 +83,7 @@ describe('Roam Message Sender', () => {
         return true;
       })
       .reply(200, {
-        id: 'msg_123456',
+        chatId: 'msg_123456',
         status: 'sent'
       });
     
