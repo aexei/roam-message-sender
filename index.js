@@ -48,11 +48,11 @@ async function run() {
         ok: true,
         status: 200,
         json: async () => ({ 
-          id: 'mock-message-id-123',
+          chatId: 'mock-message-id-123',
           status: 'sent'
         }),
         text: async () => JSON.stringify({ 
-          id: 'mock-message-id-123',
+          chatId: 'mock-message-id-123',
           status: 'sent'
         })
       };
