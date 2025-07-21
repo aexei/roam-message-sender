@@ -18,5 +18,12 @@ module.exports = {
     'semi': ['error', 'always'],
     'no-unused-vars': ['warn'],
     'no-console': 'off'
-  }
+  },
+  ignorePatterns: [
+    'dist/',
+    'node_modules/',
+    'coverage/',
+    'build/',
+    'public/'
+  ]
 };
