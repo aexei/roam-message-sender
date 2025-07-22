@@ -52,10 +52,6 @@ async function run() {
           chatId: 'mock-message-id-123',
           status: 'sent'
         }),
-        text: async () => JSON.stringify({
-          chatId: 'mock-message-id-123',
-          status: 'sent'
-        })
       };
     } else {
       // Send the actual request to Roam API
@@ -73,7 +69,7 @@ async function run() {
 
     // Handle the response
     const responseData = await response.json();
-    core.notice(`Response from Roam API: ${JSON.stringify(responseData, null, 2)}`);
+    core.info(`Response from Roam API: ${JSON.stringify(responseData, null, 2)}`);
 
     if (!response.ok) {
       const errorMessage = responseData?.error || response.statusText;
@@ -81,9 +77,9 @@ async function run() {
     }
 
     // Log success message
-    core.debug('Message sent successfully to Roam!');
+    core.info('Message sent successfully to Roam!');
     if (responseData?.chatId) {
-      core.notice(`Message ID: ${responseData.chatId}`);
+      core.info(`Message ID: ${responseData.chatId}`);
       core.setOutput('message-id', responseData.chatId);
     }
 
