@@ -1,6 +1,5 @@
 name: 'Roam Message Sender'
 description: 'Sends chat messages to Roam (ro.am) from your GitHub workflow'
-author: 'Your Name'
 branding:
   icon: 'message-circle'
   color: 'blue'

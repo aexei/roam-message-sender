@@ -1,12 +1,8 @@
 const core = require('@actions/core');
 const fetch = require('node-fetch');
-const { version } = require('./package.json');
+const { inspect } = require('util');
 
 async function run() {
-
-  console.log('Starting Roam Message Sender Action...');
-  console.log(`Action Version: ${version}`);
-
   try {
     // Get inputs from workflow
     const apiKey = core.getInput('roam-api-key', { required: true });
@@ -40,13 +36,13 @@ async function run() {
       payload.sender = sender;
     }
 
-    console.log(`Sending message to ${recipientList.length} recipient(s)`);
+    core.info(`Sending message to ${recipientList.length} recipient(s)`);
 
     // For testing: mock API response if in test mode
     let response;
     if (process.env.MOCK_ROAM_API === 'true') {
-      console.log('Running in mock mode - no actual API call will be made');
-      console.log('Payload that would be sent:', JSON.stringify(payload, null, 2));
+      core.debug('Running in mock mode - no actual API call will be made');
+      core.debug('Payload that would be sent:', JSON.stringify(payload, null, 2));
 
       // Create a mock successful response
       response = {
@@ -77,8 +73,7 @@ async function run() {
 
     // Handle the response
     const responseData = await response.json();
-    console.log(`Response from Roam API: ${JSON.stringify(responseData, null, 2)}`);
-    core.debug(`Response from Roam API: ${JSON.stringify(responseData, null, 2)}`);
+    core.notice(`Response from Roam API: ${JSON.stringify(responseData, null, 2)}`);
 
     if (!response.ok) {
       const errorMessage = responseData?.error || response.statusText;
@@ -86,9 +81,9 @@ async function run() {
     }
 
     // Log success message
-    console.log('Message sent successfully to Roam!');
+    core.debug('Message sent successfully to Roam!');
     if (responseData?.chatId) {
-      console.log(`Message ID: ${responseData.chatId}`);
+      core.notice(`Message ID: ${responseData.chatId}`);
       core.setOutput('message-id', responseData.chatId);
     }
 
@@ -99,6 +94,7 @@ async function run() {
     core.summary.write();
 
   } catch (error) {
+    core.debug(inspect(error));
     core.setFailed(`Action failed with error: ${error.message}`);
   }
 }
