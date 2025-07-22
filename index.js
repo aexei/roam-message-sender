@@ -1,7 +1,12 @@
 const core = require('@actions/core');
 const fetch = require('node-fetch');
+const { version } = require('./package.json');
 
 async function run() {
+
+  console.log('Starting Roam Message Sender Action...');
+  console.log(`Action Version: ${version}`);
+
   try {
     // Get inputs from workflow
     const apiKey = core.getInput('roam-api-key', { required: true });
