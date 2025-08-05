@@ -69,7 +69,7 @@ async function run() {
 
     // Handle the response
     const responseData = await response.json();
-    core.info(`Response from Roam API: ${JSON.stringify(responseData, null, 2)}`);
+    core.info(`Response from Roam API: ${await response.text()}`);
 
     if (!response.ok) {
       const errorMessage = responseData?.error || response.statusText;

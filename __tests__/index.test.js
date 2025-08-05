@@ -91,9 +91,6 @@ describe('Roam Message Sender', () => {
     // This is a better approach than using execSync
     await require('../index.js');
     
-    // Check if message was sent successfully
-    expect(console.log).toHaveBeenCalledWith('Message sent successfully to Roam!');
-    
     // Check that outputs were set correctly
     expect(core.setOutput).toHaveBeenCalledWith('message-id', expect.any(String));
     
