@@ -53,6 +53,8 @@ async function run() {
     // Handle the response
     const responseData = await response.json();
 
+    core.summary.addRaw(responseData);
+
     // Log the response for debugging
     core.info(`Response from Roam API: ${JSON.stringify(responseData, null, 2)}`);
 
@@ -69,10 +71,10 @@ async function run() {
     }
 
     // Set job summary
-    core.summary.addHeading('Roam Message Sent Successfully');
-    core.summary.addRaw(`Message was sent to ${recipientList.length} recipient(s)`);
-    core.summary.addCodeBlock(message, 'text');
-    core.summary.write();
+    // core.summary.addHeading('Roam Message Sent Successfully');
+    // core.summary.addRaw(`Message was sent to ${recipientList.length} recipient(s)`);
+    // core.summary.addCodeBlock(message, 'text');
+    // core.summary.write();
 
   } catch (error) {
     core.debug(inspect(error));
