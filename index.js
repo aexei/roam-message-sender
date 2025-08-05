@@ -54,9 +54,6 @@ async function run() {
     const responseData = await response.json();
 
     // Log the response for debugging
-    console.log(`Response status: ${JSON.stringify(responseData, null, 2)}`);
-    core.log(`Response status: ${JSON.stringify(responseData, null, 2)}`);
-
     core.info(`Response from Roam API: ${JSON.stringify(responseData, null, 2)}`);
 
     if (!response.ok) {
