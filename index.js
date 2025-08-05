@@ -39,36 +39,24 @@ async function run() {
     core.info(`Sending message to ${recipientList.length} recipient(s)`);
 
     // For testing: mock API response if in test mode
-    let response;
-    if (process.env.MOCK_ROAM_API === 'true') {
-      core.debug('Running in mock mode - no actual API call will be made');
-      core.debug('Payload that would be sent:', JSON.stringify(payload, null, 2));
-
-      // Create a mock successful response
-      response = {
-        ok: true,
-        status: 200,
-        json: async () => ({
-          chatId: 'mock-message-id-123',
-          status: 'sent'
-        }),
-      };
-    } else {
-      // Send the actual request to Roam API
-      response = await fetch('https://api.ro.am/v1/chat.sendMessage', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'User-Agent': 'GitHub-Action-Roam-Message-Sender'
-        },
-        body: JSON.stringify(payload)
-      });
-    }
+    const response = await fetch('https://api.ro.am/v1/chat.sendMessage', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'User-Agent': 'GitHub-Action-Roam-Message-Sender'
+      },
+      body: JSON.stringify(payload)
+    });
 
     // Handle the response
     const responseData = await response.json();
+
+    // Log the response for debugging
+    console.log(`Response status: ${JSON.stringify(responseData, null, 2)}`);
+    core.log(`Response status: ${JSON.stringify(responseData, null, 2)}`);
+
     core.info(`Response from Roam API: ${JSON.stringify(responseData, null, 2)}`);
 
     if (!response.ok) {
