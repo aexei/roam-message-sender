@@ -40,7 +40,7 @@ async function run() {
     core.info(`Sending message to ${recipientList.length} recipient(s)`);
 
     // For testing: mock API response if in test mode
-    const response = await fetch('https://api.ro.am/v1/chat.sendMessage', {
+    const response = await fetch('https://api.ro.am/v0/chat.post', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
