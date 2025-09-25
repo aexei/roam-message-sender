@@ -70,12 +70,6 @@ async function run() {
       core.setOutput('message-id', responseData.chatId);
     }
 
-    // Set job summary
-    // core.summary.addHeading('Roam Message Sent Successfully');
-    // core.summary.addRaw(`Message was sent to ${recipientList.length} recipient(s)`);
-    // core.summary.addCodeBlock(message, 'text');
-    // core.summary.write();
-
   } catch (error) {
     core.debug(inspect(error));
     core.setFailed(`Action failed with error: ${error.message}`);
