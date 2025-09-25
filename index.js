@@ -2,6 +2,75 @@ const core = require('@actions/core');
 const fetch = require('node-fetch');
 const { inspect } = require('util');
 
+async function sendMessage(recipients, message, apiKey, sender) {
+
+  if (recipients.length > 1) {
+    throw new Error('Only one recipient is allowed for sendMessage endpoint');
+  }
+
+  // Prepare the request payload
+  const payload = {
+    recipients: recipients,
+    text: message,
+  };
+
+  // Add sender if provided
+  if (Object.keys(sender).length > 0) {
+    payload.sender = sender;
+  }
+
+  core.info(`Sending message to ${recipients.length} recipient(s)`);
+
+  // For testing: mock API response if in test mode
+  const response = await fetch('https://api.ro.am/v1/chat.sendMessage', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'User-Agent': 'GitHub-Action-Roam-Message-Sender'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const errorMessage = responseData?.error || response.statusText;
+    throw new Error(`Roam API error (${response.status}): ${errorMessage}`);
+  }
+
+  // Handle the response
+  const responseData = await response.json();
+
+  return responseData;
+}
+
+async function sendToChat(chats, message, apiKey) {
+  // Prepare the request payload
+  const payload = {
+    chat: chats,
+    text: message,
+    sync: true
+  };
+
+  core.info(`Sending message to ${chats.length} chat(s)`);
+
+  // For testing: mock API response if in test mode
+  const response = await fetch('https://api.ro.am/v0/chat.post', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(payload)
+  });
+
+  // Handle the response
+  const responseData = await response.json();
+
+  return responseData;
+}
+
 async function run() {
   try {
     // Get inputs from workflow
@@ -20,55 +89,36 @@ async function run() {
     }
 
     // Prepare the sender object
-    const sender = {};
-    if (senderId) sender.id = senderId;
-    if (senderName) sender.name = senderName;
-    if (senderImage) sender.imageUrl = senderImage;
+    const regex = /^[BUVGMDPC]-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-    // Prepare the request payload
-    const payload = {
-      chat: recipientList,
-      text: message,
-      sync: true
-    };
+    const sendMessageRecipientList = recipientList.filter(id => !regex.test(id));
+    const sendChatRecipientList = recipientList.filter(id => regex.test(id));
 
-    // Add sender if provided
-    if (Object.keys(sender).length > 0) {
-      payload.sender = sender;
+    if (sendMessageRecipientList.length > 0) {
+      const sender = {};
+      if (senderId) sender.id = senderId;
+      if (senderName) sender.name = senderName;
+      if (senderImage) sender.imageUrl = senderImage;
+
+      const responseData = await sendMessage(sendMessageRecipientList, message, apiKey, sender);
+
+      core.summary.addRaw(responseData);
+
+      // Log the response for debugging
+      core.info(`Response from Roam API Message: ${JSON.stringify(responseData, null, 2)}`);
+
+      // Log success message
+      core.info('Message sent successfully to Roam!');
+      if (responseData?.chatId) {
+        core.info(`Message ID: ${responseData.chatId}`);
+        core.setOutput('message-id', responseData.chatId);
+      }
     }
 
-    core.info(`Sending message to ${recipientList.length} recipient(s)`);
+    if (sendChatRecipientList.length > 0) {
+      const responseData = await sendToChat(sendChatRecipientList, message, apiKey);
 
-    // For testing: mock API response if in test mode
-    const response = await fetch('https://api.ro.am/v0/chat.post', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'User-Agent': 'GitHub-Action-Roam-Message-Sender'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    // Handle the response
-    const responseData = await response.json();
-
-    core.summary.addRaw(responseData);
-
-    // Log the response for debugging
-    core.info(`Response from Roam API: ${JSON.stringify(responseData, null, 2)}`);
-
-    if (!response.ok) {
-      const errorMessage = responseData?.error || response.statusText;
-      throw new Error(`Roam API error (${response.status}): ${errorMessage}`);
-    }
-
-    // Log success message
-    core.info('Message sent successfully to Roam!');
-    if (responseData?.chatId) {
-      core.info(`Message ID: ${responseData.chatId}`);
-      core.setOutput('message-id', responseData.chatId);
+      core.info(`Response from Roam API Chat: ${JSON.stringify(responseData, null, 2)}`);
     }
 
   } catch (error) {
