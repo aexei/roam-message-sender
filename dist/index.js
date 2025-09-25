@@ -33,8 +33,9 @@ async function run() {
 
     // Prepare the request payload
     const payload = {
-      recipients: recipientList,
-      text: message
+      chat: recipientList,
+      text: message,
+      sync: true
     };
 
     // Add sender if provided
