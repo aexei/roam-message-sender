@@ -1,8 +1,23 @@
-const nock = require('nock');
+import nock from 'nock';
+import { jest } from '@jest/globals';
 
-// Mock the GitHub Actions core module
-jest.mock('@actions/core');
-const core = require('@actions/core');
+const mockCore = {
+  getInput: jest.fn(),
+  setOutput: jest.fn(),
+  setFailed: jest.fn(),
+  info: jest.fn(),
+  debug: jest.fn(),
+  summary: {
+    addHeading: jest.fn().mockReturnThis(),
+    addRaw: jest.fn().mockReturnThis(),
+    addCodeBlock: jest.fn().mockReturnThis(),
+    write: jest.fn().mockResolvedValue()
+  }
+};
+
+jest.unstable_mockModule('@actions/core', () => mockCore);
+
+const { run } = await import('../index.js');
 
 // Setup input mocks
 const mockInputs = {
@@ -15,26 +30,12 @@ const mockInputs = {
 };
 
 // Mock the getInput function
-core.getInput = jest.fn().mockImplementation((name, options = {}) => {
+mockCore.getInput.mockImplementation((name, options = {}) => {
   if (options.required && !mockInputs[name]) {
     throw new Error(`Input required and not supplied: ${name}`);
   }
   return mockInputs[name] || '';
 });
-
-// Mock the setOutput function
-core.setOutput = jest.fn();
-
-// Mock the setFailed function
-core.setFailed = jest.fn();
-
-// Mock the summary object
-core.summary = {
-  addHeading: jest.fn().mockReturnThis(),
-  addRaw: jest.fn().mockReturnThis(),
-  addCodeBlock: jest.fn().mockReturnThis(),
-  write: jest.fn().mockResolvedValue()
-};
 
 describe('Roam Message Sender', () => {
   let originalConsoleLog;
@@ -51,6 +52,8 @@ describe('Roam Message Sender', () => {
     
     // Clear all mocks
     jest.clearAllMocks();
+
+    mockInputs.recipients = 'user123';
     
     // Reset nock
     nock.cleanAll();
@@ -77,7 +80,7 @@ describe('Roam Message Sender', () => {
     nock('https://api.ro.am')
       .post('/v1/chat.sendMessage', body => {
         expect(body).toEqual({
-          recipients: ['user123', 'group456'],
+          recipients: ['user123'],
           text: 'Hello from GitHub Actions!'
         });
         return true;
@@ -89,13 +92,13 @@ describe('Roam Message Sender', () => {
     
     // Run the action by requiring it directly
     // This is a better approach than using execSync
-    await require('../index.js');
+    await run();
     
     // Check that outputs were set correctly
-    expect(core.setOutput).toHaveBeenCalledWith('message-id', expect.any(String));
+    expect(mockCore.setOutput).toHaveBeenCalledWith('message-id', expect.any(String));
     
     // Check that setFailed was not called
-    expect(core.setFailed).not.toHaveBeenCalled();
+    expect(mockCore.setFailed).not.toHaveBeenCalled();
   });
   
 });

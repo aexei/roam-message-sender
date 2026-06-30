@@ -1,6 +1,7 @@
-const core = require('@actions/core');
-const fetch = require('node-fetch');
-const { inspect } = require('util');
+import * as core from '@actions/core';
+import fetch from 'node-fetch';
+import { inspect } from 'node:util';
+import { pathToFileURL } from 'node:url';
 
 async function sendMessage(recipients, message, apiKey, sender) {
 
@@ -33,13 +34,18 @@ async function sendMessage(recipients, message, apiKey, sender) {
     body: JSON.stringify(payload)
   });
 
+  // Parse JSON once so both success and error paths can use the payload.
+  let responseData;
+  try {
+    responseData = await response.json();
+  } catch {
+    responseData = undefined;
+  }
+
   if (!response.ok) {
     const errorMessage = responseData?.error || response.statusText;
     throw new Error(`Roam API error (${response.status}): ${errorMessage}`);
   }
-
-  // Handle the response
-  const responseData = await response.json();
 
   return responseData;
 }
@@ -127,7 +133,9 @@ async function run() {
   }
 }
 
-run();
+export { run, sendMessage, sendToChat };
 
-// Export for testing
-module.exports = run;
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) {
+  run();
+}
